@@ -6,72 +6,114 @@ let calorias = document.getElementById('txtcalorias');
 let carbohidratos = document.getElementById('txtcarbohidratos');
 let proteinas = document.getElementById('txtproteinas');
 
-const attrsToString = (obj = {}) => {
-  const keys = Object.keys(obj);
-  const attrs = []
+const attrsToString = (obj = {}) =>
+  Object.keys(obj)
+    .map(attr => `${attr}="${obj[attr]}"`)
+    .join(' ')
 
-  for(let i=0; i < keys.length; i++){
-    let attr = keys[i];
-    attrs.push(attr);
-  }
 
-  const cadena = attrs.join('');
-  return cadena;
-}
+const tagAttrs = obj => (content = '') => 
+`<${obj.tag} ${obj.attrs ? ' ' :	 ''} ${attrsToString(obj.attrs)}> ${content} </${obj.tag}>`;
 
-const tagAttrs = obj => (content = "") => 
-`<${obj.tag} ${obj.attrs}></>`;
+const tag = t => typeof t === 'string' ? tagAttrs({tag: t}) : tagAttrs(t);
 
-const tag =  t => content => `<${t}>${content}</${t}>`
+const tableRowTag = tag('tr');
+const tableRow = items => compose(tableRowTag, tableCells)(items);
+
+const tableCell = tag('td');
+const tableCells = items => items.map(tableCell).join('');
+
+const trashIcon = tag({tag: 'i', attrs: {class: 'fas fa-trash-alt'}})('');
 
 let list = [];
 
-description.keypress(() => {
-  description.removeClass('is-invalid');
-});
-calorias.keypress(() => {
-  calorias.removeClass('is-invalid');
-});
-carbohidratos.keypress(() => {
-  carbohidratos.removeClass('is-invalid');
-});
-proteinas.keypress(() => {
-  proteinas.removeClass('is-invalid');
-});
+description.onkeypress = () => {
+  description.classList.remove('is-invalid');
+};
+calorias.onkeypress = () => {
+  calorias.classList.remove('is-invalid');
+};
+carbohidratos.onkeypress = () => {
+  carbohidratos.classList.remove('is-invalid');
+};
+proteinas.onkeypress = () => {
+  proteinas.classList.remove('is-invalid');
+};
 
-const validarInputs = () => {
-  description.val() ? '' : description.addClass('is-invalid');
-  calorias.val() ? '' : calorias.addClass('is-invalid');
-  carbohidratos.val() ? '' : carbohidratos.addClass('is-invalid');
-  proteinas.val() ? '' : proteinas.addClass('is-invalid');
+validarInputs = () => {
+  console.log('validacion');
+  description.value ? '' : description.classList.add('is-invalid');
+  calorias.value ? '' : calorias.classList.add('is-invalid');
+  carbohidratos.value ? '' : carbohidratos.classList.add('is-invalid');
+  proteinas.value ? '' : proteinas.classList.add('is-invalid');
 
   if (
-    escription.val() === '' ||
-    calorias.val() === '' ||
-    carbohidratos.val() === '' ||
-    proteinas.val()
+    description.value === '' ||
+    calorias.value === '' ||
+    carbohidratos.value === '' ||
+    proteinas.value === ''
   ) {
 
   } else {
     add();
-    cleanInputs();
   }
 };
 
 const add = () => {
   const newItem = {
-    descripcion: description.val(),
-    calorias: parseInt(calorias.val()),
-    carbohidratos: parseInt(carbohidratos.val()),
-    proteinas: parseInt(proteinas.val())
+    descripcion: description.value,
+    calorias: parseInt(calorias.value),
+    carbohidratos: parseInt(carbohidratos.value),
+    proteinas: parseInt(proteinas.value)
   }
   list.push(newItem);
+  updateTotals()
+  cleanInputs()
+  renderItems()
 }
 
 const cleanInputs = () => {
-  description.val('') ;
-  calorias.val('');
-  carbohidratos.val('');
-  proteinas.val('');
+  description.value = '' ;
+  calorias.value = '';
+  carbohidratos.value = '';
+  proteinas.value = '';
 }
 
+const removeItem = (index) => {
+  list.splice(index, 1)
+
+  updateTotals()
+  renderItems()
+}
+
+const updateTotals = () => {
+  let calories = 0; carbs = 0; protein = 0;
+
+  list.map(item => {
+    calories += item.calorias,
+    carbs += item.carbohidratos,
+    protein += item.proteinas
+  })
+
+  $('#totalCalories').text(calories)
+  $('#totalCarbs').text(carbs)
+  $('#totalProtein').text(protein)
+}
+
+const renderItems = () => {
+  $('tbody').empty()
+
+  list.map((item, index) => {
+
+    const removeButton = tag({
+      tag: 'button',
+      attrs: {
+        class: 'btn btn-outline-danger',
+        onclick: `removeItem(${index})`
+      }
+    })(trashIcon)
+    const content = tableRow([item.descripcion, item.calorias, item.carbohidratos, item.proteinas, removeButton]);
+    console.log(content);
+    $('tbody').append(content);
+  })
+}
