@@ -1,5 +1,4 @@
-const compose = (...functions) => data =>
-  functions.reduceRight((value, func) => func(value), data)
+const compose = (...functions) => data => functions.reduceRight((value, func) => func(value), data)
 
 let description = document.getElementById('txtdescripcion');
 let calorias = document.getElementById('txtcalorias');
@@ -87,17 +86,19 @@ const removeItem = (index) => {
 }
 
 const updateTotals = () => {
-  let calories = 0; carbs = 0; protein = 0;
+  let calories = 0;
+  let carbs = 0;
+  let protein = 0;
 
   list.map(item => {
     calories += item.calorias,
     carbs += item.carbohidratos,
     protein += item.proteinas
-  })
+  });
 
-  $('#totalCalories').text(calories)
-  $('#totalCarbs').text(carbs)
-  $('#totalProtein').text(protein)
+  $('#totalCalories').text(calories);
+  $('#totalCarbs').text(carbs);
+  $('#totalProtein').text(protein);
 }
 
 const renderItems = () => {
